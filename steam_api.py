@@ -4,49 +4,75 @@ import requests
 def get_collection_mod_ids(collection_id):
     url = "https://api.steampowered.com/ISteamRemoteStorage/GetCollectionDetails/v1/"
 
-    # Steam expects the number of collections first
-    # Then each collection ID as publishedfileids[0], publishedfileids[1], etc.
+    # Steam requires the number of collections being requested
     data = {
         "collectioncount": 1,
         "publishedfileids[0]": collection_id
     }
 
-    # Sends the request to Steam
+    # Sends request to Steam
     response = requests.post(url, data=data)
+
+    # Stops the program if the Steam request completely fails
     response.raise_for_status()
 
-    # Converts Steam's response into Python dictionary/list data
-    result = response.json()["response"]["collectiondetails"][0]
+    # Converts Steam's JSON response into Python data
+    data = response.json()
 
-    # If the collection is invalid, private, deleted, or empty, stop clearly
+    # Safety check in case Steam returns an unexpected response
+    if "response" not in data or "collectiondetails" not in data["response"]:
+        return []
+
+    collection_list = data["response"]["collectiondetails"]
+
+    # Safety check in case the collection does not exist or is private
+    if len(collection_list) == 0:
+        return []
+
+    result = collection_list[0]
+
+    # Safety check in case the collection has no mods inside it
     if "children" not in result:
         return []
 
     mod_ids = []
 
-    # Each child is one mod inside the collection
+    # Each child inside the collection is a Workshop mod
     for child in result["children"]:
-        mod_ids.append(child["publishedfileid"])
+        if "publishedfileid" in child:
+            mod_ids.append(child["publishedfileid"])
 
     return mod_ids
 
 
-# Gets details like title/name for each Workshop mod ID
+# Gets Steam Workshop details for each mod ID
 def get_published_file_details(file_ids):
     url = "https://api.steampowered.com/ISteamRemoteStorage/GetPublishedFileDetails/v1/"
 
-    # Steam requires itemcount to match the number of IDs being requested
+    # Safety check to avoid calling Steam with an empty list
+    if len(file_ids) == 0:
+        return []
+
+    # Steam requires itemcount to match the number of IDs
     data = {
         "itemcount": len(file_ids)
     }
 
-    # Adds every mod ID to the request using Steam's required format
+    # Adds each mod ID using Steam's required format
     for index, file_id in enumerate(file_ids):
         data["publishedfileids[" + str(index) + "]"] = file_id
 
-    # Sends the request to Steam
+    # Sends request to Steam
     response = requests.post(url, data=data)
+
+    # Stops the program if the Steam request completely fails
     response.raise_for_status()
 
-    # Returns the list of mod detail dictionaries
-    return response.json()["response"]["publishedfiledetails"]
+    # Converts response into Python data
+    data = response.json()
+
+    # Safety check in case Steam returns an unexpected response
+    if "response" not in data or "publishedfiledetails" not in data["response"]:
+        return []
+
+    return data["response"]["publishedfiledetails"]
