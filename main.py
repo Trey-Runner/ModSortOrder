@@ -1,11 +1,10 @@
-import json
-from steam_api import get_published_file_details
+from steam_api import get_collection_mod_ids, get_published_file_details
 from sorter import sort_mods
 
-with open("saved_mods.json", "r") as file:
-    saved_mod_ids = json.load(file)
+collection_id = input("Enter RimWorld Steam collection ID: ")
 
-mods = get_published_file_details(saved_mod_ids)
+mod_ids = get_collection_mod_ids(collection_id)
+mods = get_published_file_details(mod_ids)
 
 clean_mods = []
 
