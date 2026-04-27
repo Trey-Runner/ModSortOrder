@@ -7,6 +7,9 @@ collection_id = input("Enter RimWorld Steam collection ID: ")
 # Gets all mod IDs inside the collection
 mod_ids = get_collection_mod_ids(collection_id)
 
+# Tests to see if the collection is empty or not
+print("DEBUG mod_ids:", mod_ids)
+
 # Stops if the collection is private, empty, deleted, or invalid
 if len(mod_ids) == 0:
     print("No mods found. The collection may be private, empty, deleted, or the ID may be wrong.")
