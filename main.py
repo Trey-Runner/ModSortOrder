@@ -1,34 +1,39 @@
 from steam_api import get_collection_mod_ids, get_published_file_details
 from sorter import sort_mods
 
-# User enters the Steam Workshop collection ID
+# Asks the user for a Steam Workshop collection ID
 collection_id = input("Enter RimWorld Steam collection ID: ")
 
-# Pulls all mod IDs from that collection
+# Gets all mod IDs inside the collection
 mod_ids = get_collection_mod_ids(collection_id)
 
-# Stops if Steam does not return any mods
+# Stops if the collection is private, empty, deleted, or invalid
 if len(mod_ids) == 0:
     print("No mods found. The collection may be private, empty, deleted, or the ID may be wrong.")
 else:
-    # Gets each mod's Steam Workshop details
+    # Gets title and Steam details for each mod
     mods = get_published_file_details(mod_ids)
 
     clean_mods = []
 
-    # Keeps only the information needed for sorting/display
+    # Keeps only valid mods that Steam successfully returned
     for mod in mods:
-        clean_mods.append({
-            "id": mod["publishedfileid"],
-            "title": mod["title"]
-        })
+        if mod.get("result") == 1 and "title" in mod and "publishedfileid" in mod:
+            clean_mods.append({
+                "id": mod["publishedfileid"],
+                "title": mod["title"]
+            })
 
-    # Sorts the list based on custom priority rules
-    sorted_mods = sort_mods(clean_mods)
+    # Stops if all returned mods were invalid, deleted, hidden, or missing titles
+    if len(clean_mods) == 0:
+        print("No valid mod details found.")
+    else:
+        # Sorts mods using the custom load order rules
+        sorted_mods = sort_mods(clean_mods)
 
-    # Displays final sorted load order
-    print("RimWorld Mod Load Order")
-    print("-----------------------")
+        # Displays the final sorted mod load order
+        print("RimWorld Mod Load Order")
+        print("-----------------------")
 
-    for index, mod in enumerate(sorted_mods, start=1):
-        print(str(index) + ". " + mod["title"] + " (" + mod["id"] + ")")
+        for index, mod in enumerate(sorted_mods, start=1):
+            print(str(index) + ". " + mod["title"] + " (" + mod["id"] + ")")
