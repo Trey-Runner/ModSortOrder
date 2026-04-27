@@ -1,4 +1,4 @@
-# RimWorld Mod Load Order Sorter Trey Runner
+# RimWorld Mod Load Order Sorter
 
 A simple Python tool that takes a Steam Workshop collection ID and generates a sorted RimWorld mod load order based on priority rules.
 
