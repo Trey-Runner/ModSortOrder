@@ -1,3 +1,4 @@
+from report import make_html_report
 from steam_api import get_collection_mod_ids, get_published_file_details
 from sorter import sort_mods
 
@@ -33,6 +34,8 @@ else:
     else:
         # Sorts mods using the custom load order rules
         sorted_mods = sort_mods(clean_mods)
+        # Routes finished product to a UI in HTML
+        make_html_report(sorted_mods)
 
         # Displays the final sorted mod load order
         print("RimWorld Mod Load Order")
